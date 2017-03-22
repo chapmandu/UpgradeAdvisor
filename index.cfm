@@ -3,7 +3,7 @@
   <cfset _plugin = application.wheels.plugins.upgradeadvisor.init()>
   <cfset results = _plugin.main()>
   
-	<h1>Wheels 2.x Upgrade Advisor</h1>
+  <h1>Wheels 2.x Upgrade Advisor</h1>
   <h3>Checks your Wheels 1.x application for compatibility with Wheels 2.x.</h3>
 
   <cfloop array="#results#" index="i">

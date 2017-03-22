@@ -1,9 +1,9 @@
 component output="false" {
 
-	public any function init() {
-		this.version = "2.0";
-		return this;
-	}
+  public any function init() {
+    this.version = "2.0";
+    return this;
+  }
 
   /**
    * This plugin version number
@@ -206,18 +206,18 @@ component output="false" {
     };
 
     if (StructKeyExists(server, "lucee")) {
-			local.serverName = "Lucee";
-			local.serverVersion = server.lucee.version;
-		} else if (StructKeyExists(server, "railo")) {
-			local.rv.success = false;
+      local.serverName = "Lucee";
+      local.serverVersion = server.lucee.version;
+    } else if (StructKeyExists(server, "railo")) {
+      local.rv.success = false;
       ArrayAppend(local.rv.messages, {
         message="Railo is not supported in Wheels 2.0"
       });
       return local.rv;
     } else {
-			local.serverName = "Adobe ColdFusion";
-			local.serverVersion = server.coldfusion.productVersion;
-		}
+      local.serverName = "Adobe ColdFusion";
+      local.serverVersion = server.coldfusion.productVersion;
+    }
 
     local.upgradeTo = _checkCFMLEngine(engine=local.serverName, version=local.serverVersion);
 
@@ -405,44 +405,44 @@ component output="false" {
    * Plagiarises the wheels $checkMinimumVersion function
    */
   private string function _checkCFMLEngine(required string engine, required string version) {
-		local.rv = "";
-		local.version = Replace(arguments.version, ".", ",", "all");
-		local.major = ListGetAt(local.version, 1);
-		local.minor = 0;
-		local.patch = 0;
-		if (ListLen(local.version) > 1)
-		{
-			local.minor = ListGetAt(local.version, 2);
-		}
-		if (ListLen(local.version) > 2)
-		{
-			local.patch = ListGetAt(local.version, 3);
-		}
-		if (arguments.engine == "Lucee")
-		{
-			local.minimumMajor = "4";
-			local.minimumMinor = "5";
-			local.minimumPatch = "1";
-		}
-		else if (arguments.engine == "Adobe ColdFusion")
-		{
-			local.minimumMajor = "10";
-			local.minimumMinor = "0";
-			local.minimumPatch = "16";
-			// local.10 = {minimumMinor=0, minimumPatch=4};
-		}
-		if (local.major < local.minimumMajor || (local.major == local.minimumMajor && local.minor < local.minimumMinor) || (local.major == local.minimumMajor && local.minor == local.minimumMinor && local.patch < local.minimumPatch))
-		{
-			local.rv = local.minimumMajor & "." & local.minimumMinor & "." & local.minimumPatch;
-		}
-		if (StructKeyExists(local, local.major))
-		{
-			// special requirements for having a specific minor or patch version within a major release exists
-			if (local.minor < local[local.major].minimumMinor || (local.minor == local[local.major].minimumMinor && local.patch < local[local.major].minimumPatch))
-			{
-				local.rv = local.major & "." & local[local.major].minimumMinor & "." & local[local.major].minimumPatch;
-			}
-		}
+    local.rv = "";
+    local.version = Replace(arguments.version, ".", ",", "all");
+    local.major = ListGetAt(local.version, 1);
+    local.minor = 0;
+    local.patch = 0;
+    if (ListLen(local.version) > 1)
+    {
+      local.minor = ListGetAt(local.version, 2);
+    }
+    if (ListLen(local.version) > 2)
+    {
+      local.patch = ListGetAt(local.version, 3);
+    }
+    if (arguments.engine == "Lucee")
+    {
+      local.minimumMajor = "4";
+      local.minimumMinor = "5";
+      local.minimumPatch = "1";
+    }
+    else if (arguments.engine == "Adobe ColdFusion")
+    {
+      local.minimumMajor = "10";
+      local.minimumMinor = "0";
+      local.minimumPatch = "16";
+      // local.10 = {minimumMinor=0, minimumPatch=4};
+    }
+    if (local.major < local.minimumMajor || (local.major == local.minimumMajor && local.minor < local.minimumMinor) || (local.major == local.minimumMajor && local.minor == local.minimumMinor && local.patch < local.minimumPatch))
+    {
+      local.rv = local.minimumMajor & "." & local.minimumMinor & "." & local.minimumPatch;
+    }
+    if (StructKeyExists(local, local.major))
+    {
+      // special requirements for having a specific minor or patch version within a major release exists
+      if (local.minor < local[local.major].minimumMinor || (local.minor == local[local.major].minimumMinor && local.patch < local[local.major].minimumPatch))
+      {
+        local.rv = local.major & "." & local[local.major].minimumMinor & "." & local[local.major].minimumPatch;
+      }
+    }
     return local.rv;
   }
 
