@@ -1,7 +1,7 @@
 component output="false" {
 
   public any function init() {
-    this.version = "2.0";
+    this.version = "2.x";
     return this;
   }
 
@@ -16,29 +16,18 @@ component output="false" {
    * The main entry function that compiles the check results
    */
   public array function main() {
-    local.advice = [
-      adviseOfGlobalFunctions(),
-      adviseOfRoutes(),
-      adviseOfDBMigrate(),
-      adviseOfRedundantFiles(),
+    return [
       adviseOfServerVersion(),
+      adviseOfRoutes(),
+      adviseOfCSRF(),
+      adviseOfRedundantFiles(),
+      adviseOfDBMigrate(),
+      adviseOfGlobalFunctions(),
       adviseOfTestMappings(),
       adviseOfRemovedViewFunctions(),
       adviseOfClearServerCache(),
       adviseOfUpdateProperties()
     ];
-
-    local.rv = [];
-    // put problems first
-    for (local.i in local.advice) {
-      if (i.success) {
-        ArrayPrepend(local.rv, local.i);
-      } else {
-        ArrayAppend(local.rv, local.i);
-      }
-    }
-
-    return local.rv;
   }
 
   /**
@@ -64,7 +53,7 @@ component output="false" {
 
     return local.rv;
   }
-  
+
   /**
    * Checks for the coldroute plugin and if coldroute style routes are in use
    */
@@ -77,23 +66,23 @@ component output="false" {
     };
     local.routesFileContent = FileRead(ExpandPath("/config/routes.cfm"));
     local.pluginDirectoryPath = ExpandPath("/plugins/coldroute");
-    
+
     if (local.routesFileContent contains "addRoute" && local.routesFileContent does not contain "drawRoutes") {
       local.rv.success = false;
       ArrayAppend(local.rv.messages, {
-        message="The <code>addRoute</code> function has been removed from Wheels 2.0. Use the new <code>drawRoutes</code> function/s"
+        message="The <code>addRoute</code> function has been removed from Wheels 2.x. Use the new <code>drawRoutes</code> function/s"
       });
     }
 
     if (DirectoryExists(local.pluginDirectoryPath)) {
       local.rv.success = false;
       ArrayAppend(local.rv.messages, {
-        message="The coldroute plugin is now part of the Wheels 2.0 core. It can be removed."
+        message="The coldroute plugin is now part of the Wheels 2.x core. It can be removed."
       });
     }
 
     if (!local.rv.success) {
-      local.rv.href = "http://docs.cfwheels.org/v2.0/docs/routing";
+      local.rv.href = "http://docs.cfwheels.org/v2.x/docs/routing";
     }
 
     return local.rv;
@@ -116,14 +105,14 @@ component output="false" {
     if (DirectoryExists(local.pluginDirectoryPath)) {
       local.rv.success = false;
       ArrayAppend(local.rv.messages, {
-        message="The dbmigrate plugin is now part of the Wheels 2.0 core. It can be removed."
+        message="The dbmigrate plugin is now part of the Wheels 2.x core. It can be removed."
       });
     }
 
     // check migration inheritance
     if (DirectoryExists(local.migrationsPath)) {
       local.allFiles = DirectoryList(local.migrationsPath, false, "name", "*.cfc");
-      
+
       local.files = ArrayFilter(local.allFiles, function(i) {
         local.cfc = GetComponentMetaData("db.migrate.#ListFirst(i, ".")#");
         return local.cfc.extends.fullname neq "wheels.dbmigrate.Migration";
@@ -137,7 +126,7 @@ component output="false" {
     }
 
     if (!local.rv.success) {
-      // local.rv.href = "http://docs.cfwheels.org/2.0/dbmigrate"; // TODO: verify this href
+      // local.rv.href = "http://docs.cfwheels.org/2.x/dbmigrate"; // TODO: verify this href
     }
 
     return local.rv;
@@ -161,7 +150,7 @@ component output="false" {
     local.modelFilePath = ExpandPath("/models/Model.cfc");
     local.modelCFC = GetComponentMetaData("models.Model");
     local.modelMapping = "wheels.Model";
-    
+
     if (FileExists(local.wheelsControllerFilePath)) {
       local.rv.success = false;
       ArrayAppend(local.rv.messages, {
@@ -197,7 +186,7 @@ component output="false" {
    * Checks for the minimum cfml engine version
    */
   public struct function adviseOfServerVersion() {
-    
+
     local.rv = {
       name="CFML Engine",
       success=true,
@@ -211,7 +200,7 @@ component output="false" {
     } else if (StructKeyExists(server, "railo")) {
       local.rv.success = false;
       ArrayAppend(local.rv.messages, {
-        message="Railo is not supported in Wheels 2.0"
+        message="Railo is not supported in Wheels 2.x"
       });
       return local.rv;
     } else {
@@ -224,7 +213,7 @@ component output="false" {
     if (Len(local.upgradeTo)) {
       local.rv.success = false;
       ArrayAppend(local.rv.messages, {
-        message="#local.serverName# #local.serverVersion# is not supported by Wheels 2.0. Please upgrade to version #local.upgradeTo# or higher."
+        message="#local.serverName# #local.serverVersion# is not supported by Wheels 2.x. Please upgrade to version #local.upgradeTo# or higher."
       });
     }
 
@@ -255,7 +244,7 @@ component output="false" {
     // check test file mappings
     if (DirectoryExists(local.testDirectoryPath)) {
       local.allFiles = DirectoryList(local.testDirectoryPath, true, "path", "*.cfc");
-      
+
       local.files = ArrayFilter(local.allFiles, function(i) {
         // TODO: use GetComponentMetaData
         local.content = FileRead(i);
@@ -265,7 +254,7 @@ component output="false" {
         local.rv.success = false;
         ArrayAppend(local.rv.messages, {
           message="
-            You have #ArrayLen(local.files)# test packages that should extend <code>#local.mapping#</code> 
+            You have #ArrayLen(local.files)# test packages that should extend <code>#local.mapping#</code>
             (Unless you have implemented your own base test component, in which case it should extend <code>#local.mapping#</code>).
           "
         });
@@ -273,7 +262,7 @@ component output="false" {
     }
 
     if (!local.rv.success) {
-      local.rv.href = "http://docs.cfwheels.org/2.0/dbmigrate"; // TODO: verify this href
+      local.rv.href = "http://docs.cfwheels.org/2.x/dbmigrate"; // TODO: verify this href
     }
 
     return local.rv;
@@ -294,7 +283,7 @@ component output="false" {
 
     if (DirectoryExists(local.viewDirectoryPath)) {
       local.allFiles = DirectoryList(local.viewDirectoryPath, true, "path", "*.cfm|*.cfc");
-      
+
       local.files = ArrayFilter(local.allFiles, function(i) {
         local.content = FileRead(i);
         return (local.content contains "confirm=" or local.content contains "disable=");
@@ -331,7 +320,7 @@ component output="false" {
     local.configDirectoryPath = ExpandPath("/config");
 
     local.allFiles = DirectoryList(local.configDirectoryPath, true, "path", "*.cfm");
-    
+
     local.files = ArrayFilter(local.allFiles, function(i) {
       local.content = FileRead(i);
       return local.content contains "set(clearServerCache=";
@@ -371,7 +360,7 @@ component output="false" {
     local.allFiles = [];
     ArrayAppend(local.allFiles, DirectoryList(local.controllerDirectoryPath, true, "path", "*.cfc"), true);
     ArrayAppend(local.allFiles, DirectoryList(local.modelDirectoryPath, true, "path", "*.cfc"), true);
-    
+
     local.files = ArrayFilter(local.allFiles, function(i) {
       local.content = FileRead(i);
       return (local.content contains "updateProperties(");
@@ -393,6 +382,50 @@ component output="false" {
     return local.rv;
   }
 
+  /**
+   * Checks for the existence of csrf use
+   */
+  public struct function adviseOfCSRF() {
+    local.rv = {
+      name="Cross Site Request Forgery (CSRF) Protection",
+      success=true,
+      href="",
+      messages=[]
+    };
+
+    local.controllerFilePath = ExpandPath("/controllers/Controller.cfc");
+    local.viewDirectoryPath = ExpandPath("/views");
+
+    local.controllerContent = FileRead(local.controllerFilePath);
+    if (local.controllerContent does not contain "protectFromForgery(") {
+      local.rv.success = false;
+      ArrayAppend(local.rv.messages, {
+        message="It's recommended that you use the <code>protectFromForgery()</code> in the <code>init()</code> function of <code>#_pathFormat(local.controllerFilePath)#</code>"
+      });
+    }
+
+    if (DirectoryExists(local.viewDirectoryPath)) {
+      local.allFiles = DirectoryList(local.viewDirectoryPath, true, "path", "*.cfm");
+      for (local.i in local.allFiles) {
+        local.content = FileRead(local.i);
+        // csrfMetaTags(
+        local.containsMetaTags = false;
+        if (local.content contains "csrfMetaTags(") {
+          local.containsMetaTags = false;
+          break;
+        }
+      }
+      if (!local.containsMetaTags) {
+        local.rv.success = false;
+        ArrayAppend(local.rv.messages, {
+          message="It's recommended that you use the <code>csrfMetaTags(</code> in your <code>layout.cfm</code></code>"
+        });
+        local.rv.href="https://github.com/liquifusion/cfwheels-csrf-protection";
+      }
+    }
+
+    return local.rv;
+  }
 
   /**
    * Removes the file path before the app root
@@ -421,9 +454,9 @@ component output="false" {
       local.minimumMinor = "5";
       local.minimumPatch = "1";
     } else if (arguments.engine == "Adobe ColdFusion") {
-      local.minimumMajor = "10";
+      local.minimumMajor = "11";
       local.minimumMinor = "0";
-      local.minimumPatch = "16";
+      local.minimumPatch = "11";
       // local.10 = {minimumMinor=0, minimumPatch=4};
     }
     if (local.major < local.minimumMajor || (local.major == local.minimumMajor && local.minor < local.minimumMinor) || (local.major == local.minimumMajor && local.minor == local.minimumMinor && local.patch < local.minimumPatch)) {
