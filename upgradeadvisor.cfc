@@ -1,5 +1,7 @@
 component output="false" {
 
+  // TODO: DRY
+
   public any function init() {
     this.version = "2.x";
     return this;
@@ -9,7 +11,7 @@ component output="false" {
    * This plugin version number
    */
   public string function pluginVersion() {
-    return "0.2.0";
+    return "0.3.0";
   }
 
   /**
@@ -24,8 +26,8 @@ component output="false" {
       adviseOfDBMigrate(),
       adviseOfGlobalFunctions(),
       adviseOfTestMappings(),
+      adviseOfConfigSettings(),
       adviseOfRemovedViewFunctions(),
-      adviseOfClearServerCache(),
       adviseOfUpdateProperties()
     ];
   }
@@ -307,11 +309,11 @@ component output="false" {
   }
 
   /**
-   * Checks for the use of the renamed clearServerCache setting
+   * Checks for breaking chnages on config settings
    */
-  public struct function adviseOfClearServerCache() {
+  public struct function adviseOfConfigSettings() {
     local.rv = {
-      name="clearServerCache Function",
+      name="Config Settings",
       success=true,
       href="",
       messages=[]
@@ -337,6 +339,18 @@ component output="false" {
       local.message &= "</ul>";
       ArrayAppend(local.rv.messages, {
         message=local.message
+      });
+    }
+
+    local.files = ArrayFilter(local.allFiles, function(i) {
+      local.content = FileRead(i);
+      return local.content does not contain "set(timeStampMode=";
+    });
+
+    if (ArrayLen(local.files)) {
+      local.rv.success = false;
+      ArrayAppend(local.rv.messages, {
+        message='The global setting <code>set(timeStampMode="local")</code> should be used to maintain 1.x behaviour. The 2.x default is <code>UTC</code>'
       });
     }
 
