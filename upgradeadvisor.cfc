@@ -29,7 +29,8 @@ component output="false" {
       adviseOfConfigSettings(),
       adviseOfAppMapping(),
       adviseOfRemovedViewFunctions(),
-      adviseOfUpdateProperties()
+      adviseOfUpdateProperties(),
+      adviseOfUrlRewriting()
     ];
   }
 
@@ -464,6 +465,37 @@ component output="false" {
         local.rv.success = false;
         ArrayAppend(local.rv.messages, {
           message="Wheels 2.x has created an <code>/app</code> mapping to this application's root (<code>#ExpandPath('/')#</code>). Your mapping should be removed or renamed"
+        });
+        break;
+      }
+    }
+
+    return local.rv;
+  }
+
+  /**
+   * Checks for a clashing mapping called 'app'
+   */
+  public struct function adviseOfUrlRewriting() {
+    local.rv = {
+      name="URL Rewriting",
+      success=true,
+      href="",
+      messages=[]
+    };
+
+    local.paths = [
+      ExpandPath("/.htaccess"),
+      ExpandPath("/web.config"),
+      ExpandPath("/urlrewrite.xml")
+    ];
+    local.string = "wheels/public/assets";
+
+    for (local.path in local.paths) {
+      if (FileExists(local.path) && FileRead(local.path) does not contain local.string) {
+        local.rv.success = false;
+        ArrayAppend(local.rv.messages, {
+          message="The rule <code>wheels/public/assets</code> is required in your <code>#_pathFormat(local.path)#</code> url rewrite file"
         });
         break;
       }
