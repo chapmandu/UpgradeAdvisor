@@ -27,6 +27,7 @@ component output="false" {
       adviseOfGlobalFunctions(),
       adviseOfTestMappings(),
       adviseOfConfigSettings(),
+      adviseOfAppMapping(),
       adviseOfRemovedViewFunctions(),
       adviseOfUpdateProperties()
     ];
@@ -435,6 +436,36 @@ component output="false" {
           message="It's recommended that you use the <code>csrfMetaTags(</code> in your <code>layout.cfm</code></code>"
         });
         local.rv.href="https://github.com/liquifusion/cfwheels-csrf-protection";
+      }
+    }
+
+    return local.rv;
+  }
+
+  /**
+   * Checks for a clashing mapping called 'app'
+   */
+  public struct function adviseOfAppMapping() {
+    local.rv = {
+      name="Mappings",
+      success=true,
+      href="",
+      messages=[]
+    };
+
+    local.appFileContent = FileRead(ExpandPath("/config/app.cfm"));
+    local.mappings = [
+      'mappings["/app"]',
+      "mappings['/app']"
+    ];
+
+    for (local.m in local.mappings) {
+      if (local.appFileContent contains local.m) {
+        local.rv.success = false;
+        ArrayAppend(local.rv.messages, {
+          message="Wheels 2.x has created an <code>/app</code> mapping to this application's root (<code>#ExpandPath('/')#</code>). Your mapping should be removed or renamed"
+        });
+        break;
       }
     }
 
