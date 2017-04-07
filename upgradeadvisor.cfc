@@ -11,7 +11,7 @@ component output="false" {
    * This plugin version number
    */
   public string function pluginVersion() {
-    return "0.3.0";
+    return "0.4.0";
   }
 
   /**
@@ -19,6 +19,7 @@ component output="false" {
    */
   public array function main() {
     return [
+      adviseOfInitRename(),
       adviseOfServerVersion(),
       adviseOfRoutes(),
       adviseOfCSRF(),
@@ -321,39 +322,41 @@ component output="false" {
       messages=[]
     };
 
+    local.renamedConfigs = [
+      {from="clearServerCache", to="clearTemplateCache"},
+      {from="modelRequireInit", to="modelRequireConfig"},
+      {from="cacheControllerInitialization", to="cacheControllerConfig"},
+      {from="cacheModelInitialization", to="cacheModelConfig"}
+    ];
+
     local.configDirectoryPath = ExpandPath("/config");
+    local.files = DirectoryList(local.configDirectoryPath, true, "path", "*.cfm");
 
-    local.allFiles = DirectoryList(local.configDirectoryPath, true, "path", "*.cfm");
-
-    local.files = ArrayFilter(local.allFiles, function(i) {
-      local.content = FileRead(i);
-      return local.content contains "set(clearServerCache=";
-    });
-
-    if (ArrayLen(local.files)) {
-      local.rv.success = false;
-
-      local.message = "The global setting <code>clearServerCache</code> has been renamed to <code>clearTemplateCache</code>.<br>";
-      local.message &= "<ul>";
-      for (local.i in local.files) {
-        local.message &= "<li>#_pathFormat(local.i)#</li>";
+    local.foundTimeStampMode = false;
+    local.messages = [];
+    for (local.file in local.files) {
+      local.content = FileRead(local.file);
+      for (local.config in local.renamedConfigs) {
+        if (local.content contains "set(#local.config.from#=") {
+          local.rv.success = false;
+          ArrayAppend(local.messages, "The global setting <code>#local.config.from#</code> found in <code>#_pathFormat(local.file)#</code> has been renamed to <code>#local.config.to#</code>.")
+        }
       }
-      local.message &= "</ul>";
-      ArrayAppend(local.rv.messages, {
-        message=local.message
-      });
+      if (local.content contains "set(timeStampMode=") {
+        local.foundTimeStampMode = true;
+      }
     }
 
-    local.files = ArrayFilter(local.allFiles, function(i) {
-      local.content = FileRead(i);
-      return local.content does not contain "set(timeStampMode=";
-    });
+    if (!local.foundTimeStampMode) {
+      ArrayAppend(local.messages, 'The global setting <code>set(timeStampMode="local")</code> should be used to maintain 1.x behaviour. The 2.x default is <code>UTC</code>');
+    }
 
-    if (ArrayLen(local.files)) {
-      local.rv.success = false;
-      ArrayAppend(local.rv.messages, {
-        message='The global setting <code>set(timeStampMode="local")</code> should be used to maintain 1.x behaviour. The 2.x default is <code>UTC</code>'
-      });
+    if (ArrayLen(local.messages)) {
+      for (local.message in local.messages) {
+        ArrayAppend(local.rv.messages, {
+          message=local.message
+        });
+      }
     }
 
     return local.rv;
@@ -499,6 +502,46 @@ component output="false" {
         });
         break;
       }
+    }
+
+    return local.rv;
+  }
+
+  /**
+   * Checks for the init function in controllers & models
+   */
+  public struct function adviseOfInitRename() {
+    local.rv = {
+      name="init Function",
+      success=true,
+      href="",
+      messages=[]
+    };
+
+    local.controllerDirectoryPath = ExpandPath("/controllers");
+    local.modelDirectoryPath = ExpandPath("/models");
+
+    local.allFiles = [];
+    ArrayAppend(local.allFiles, DirectoryList(local.controllerDirectoryPath, true, "path", "*.cfc"), true);
+    ArrayAppend(local.allFiles, DirectoryList(local.modelDirectoryPath, true, "path", "*.cfc"), true);
+
+    local.files = ArrayFilter(local.allFiles, function(i) {
+      // TODO: better to use GetComponentMetaData. but those dotted paths!?
+      local.content = FileRead(i);
+      return (local.content contains 'name="init"' OR local.content contains "name='init'" OR local.content contains "function init(");
+    });
+
+    if (ArrayLen(local.files)) {
+      local.rv.success = false;
+      local.message = "The <code>init</code> function in controllers and models should now be named <code>config</code>.<br>";
+      local.message &= "<ul>";
+      for (local.i in local.files) {
+        local.message &= "<li>#_pathFormat(local.i)#</li>";
+      }
+      local.message &= "</ul>";
+      ArrayAppend(local.rv.messages, {
+        message=local.message
+      });
     }
 
     return local.rv;
