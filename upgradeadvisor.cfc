@@ -94,7 +94,7 @@ component output="false" {
   }
 
   /**
-   * Checks for the bdmigrate plugin and migrations exten the correct component
+   * Checks for the dmmigrate plugin and migrations extend the correct component
    */
   public struct function adviseOfDBMigrate() {
     local.rv = {
@@ -312,7 +312,7 @@ component output="false" {
   }
 
   /**
-   * Checks for breaking chnages on config settings
+   * Checks for breaking changes on config settings
    */
   public struct function adviseOfConfigSettings() {
     local.rv = {
@@ -402,7 +402,7 @@ component output="false" {
   }
 
   /**
-   * Checks for the existence of csrf use
+   * Checks for csrf usage
    */
   public struct function adviseOfCSRF() {
     local.rv = {
@@ -477,7 +477,7 @@ component output="false" {
   }
 
   /**
-   * Checks for a clashing mapping called 'app'
+   * Checks for wheels/public/assets in url rewriting rules
    */
   public struct function adviseOfUrlRewriting() {
     local.rv = {
