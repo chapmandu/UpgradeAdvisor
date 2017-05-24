@@ -13,6 +13,6 @@
 8. Resolve the issues found (Use the `reload=true` url parameter to ensure changes are reflected)
 9. Verify your application is working as expected
 
-**^ Due to the breaking changes in CFWheels 2.x, your application may be unrepsonsive between steps 4 and 6.**
+**^ Due to the breaking changes in CFWheels 2.x, your application may be unresponsive between steps 4 and 6.**
 
-*Disclaimer: This tool has been developed as a guide only. Please use your own due diligence when performing upgrades, as the contributors take no responsibility for anything positive or negative that happens as a result of using this plugin.*
+*Disclaimer: This tool has been developed as a guide only. The contributors take no responsibility for anything positive or negative that happens as a result of using this plugin. Please use your test suite (you do have a test suite right?) and due diligence when performing upgrades*
