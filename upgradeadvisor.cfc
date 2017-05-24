@@ -1,7 +1,5 @@
 component output="false" {
 
-  // TODO: DRY
-
   public any function init() {
     this.version = "2.x";
     return this;
@@ -11,7 +9,7 @@ component output="false" {
    * This plugin version number
    */
   public string function pluginVersion() {
-    return "0.4.0";
+    return "0.5.0";
   }
 
   /**
@@ -31,7 +29,8 @@ component output="false" {
       adviseOfAppMapping(),
       adviseOfRemovedViewFunctions(),
       adviseOfUpdateProperties(),
-      adviseOfUrlRewriting()
+      adviseOfUrlRewriting(),
+      adviseOfRenderPageRename()
     ];
   }
 
@@ -76,6 +75,13 @@ component output="false" {
       local.rv.success = false;
       ArrayAppend(local.rv.messages, {
         message="The <code>addRoute</code> function has been removed from Wheels 2.x. Use the new <code>drawRoutes</code> function/s"
+      });
+    }
+
+    if (local.routesFileContent contains "module=" || local.routesFileContent contains "module =") {
+      local.rv.success = false;
+      ArrayAppend(local.rv.messages, {
+        message="The mapper <code>module</code> argument has been renamed, use <code>package</code> instead."
       });
     }
 
@@ -534,6 +540,46 @@ component output="false" {
     if (ArrayLen(local.files)) {
       local.rv.success = false;
       local.message = "The <code>init</code> function in controllers and models should now be named <code>config</code>.<br>";
+      local.message &= "<ul>";
+      for (local.i in local.files) {
+        local.message &= "<li>#_pathFormat(local.i)#</li>";
+      }
+      local.message &= "</ul>";
+      ArrayAppend(local.rv.messages, {
+        message=local.message
+      });
+    }
+
+    return local.rv;
+  }
+
+  /**
+   * Checks for the use of the renamed renderPage function
+   */
+  public struct function adviseOfRenderPageRename() {
+    local.rv = {
+      name="renderPage Function",
+      success=true,
+      href="",
+      messages=[]
+    };
+
+    local.controllerDirectoryPath = ExpandPath("/controllers");
+    local.viewDirectoryPath = ExpandPath("/views");
+
+    local.allFiles = [];
+    ArrayAppend(local.allFiles, DirectoryList(local.controllerDirectoryPath, true, "path", "*.cfc"), true);
+    ArrayAppend(local.allFiles, DirectoryList(local.controllerDirectoryPath, true, "path", "*.cfm"), true);
+    ArrayAppend(local.allFiles, DirectoryList(local.viewDirectoryPath, true, "path", "*.cfm"), true);
+
+    local.files = ArrayFilter(local.allFiles, function(i) {
+      local.content = FileRead(i);
+      return (local.content contains "renderPage(");
+    });
+
+    if (ArrayLen(local.files)) {
+      local.rv.success = false;
+      local.message = "The <code>renderPage()</code> function has been renamed, use <code>renderView()</code> instead.<br>";
       local.message &= "<ul>";
       for (local.i in local.files) {
         local.message &= "<li>#_pathFormat(local.i)#</li>";
