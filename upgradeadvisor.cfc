@@ -9,7 +9,7 @@ component output="false" {
    * This plugin version number
    */
   public string function pluginVersion() {
-    return "0.5.0";
+    return "0.6.0";
   }
 
   /**
@@ -111,7 +111,10 @@ component output="false" {
     };
     local.pluginDirectoryPath = ExpandPath("/plugins/dbmigrate");
     local.migrationsPath = ExpandPath("/db/migrate");
-    local.mapping = "wheels.dbmigrate.Migration";
+    local.newMigrationsPath = ExpandPath("/migrator/migrations");
+    local.oldTableName = "schemainfo";
+    local.newTableName = "migratorversions";
+    local.mapping = "wheels.migrator.Migration";
 
     if (DirectoryExists(local.pluginDirectoryPath)) {
       local.rv.success = false;
@@ -120,13 +123,60 @@ component output="false" {
       });
     }
 
+    // check for renamed directory
+    if (DirectoryExists(local.migrationsPath) && !DirectoryExists(local.newMigrationsPath)) {
+      local.rv.success = false;
+      ArrayAppend(local.rv.messages, {
+        message="The <code>/db/migrate</code> directory must be renamed <code>/migrator/migrations</code>."
+      });
+      ArrayAppend(local.rv.messages, {
+        message="The <code>/db/sql</code> directory must be renamed <code>/migrator/sql</code>."
+      });
+    }
+
+    // check for renamed schemainfo table
+    local.newTableExists = true;
+    try {
+      QueryExecute(
+        sql="SELECT * FROM migratorversions",
+        options={
+          datasource=application.wheels.dataSourceName
+        }
+      );
+    } catch (any e) {
+      local.newTableExists = false;
+    }
+    if (!local.newTableExists) {
+
+      local.configDirectoryPath = ExpandPath("/config");
+      local.files = DirectoryList(local.configDirectoryPath, true, "path", "*.cfm");
+      // you've specified the table name.. carry on!
+      local.foundSetting = false;
+      for (local.file in local.files) {
+        local.content = FileRead(local.file);
+        if (local.content contains "set(migratorTableName=") {
+          local.foundSetting = true;
+        }
+      }
+
+      if (!local.foundSetting) {
+        local.rv.success = false;
+        ArrayAppend(local.rv.messages, {
+          message="
+            The <code>schemainfo</code> table must be renamed <code>migratorversions</code> (or it's name set using
+            <code>set(migratorTableName='schemainfo')</code> in <code>config/settings.cfm</code>).
+          "
+        });
+      }
+    }
+
     // check migration inheritance
-    if (DirectoryExists(local.migrationsPath)) {
-      local.allFiles = DirectoryList(local.migrationsPath, false, "name", "*.cfc");
+    if (DirectoryExists(local.newMigrationsPath)) {
+      local.allFiles = DirectoryList(local.newMigrationsPath, false, "name", "*.cfc");
 
       local.files = ArrayFilter(local.allFiles, function(i) {
-        local.cfc = GetComponentMetaData("db.migrate.#ListFirst(i, ".")#");
-        return local.cfc.extends.fullname neq "wheels.dbmigrate.Migration";
+        local.cfc = GetComponentMetaData("migrator.migrations.#ListFirst(i, ".")#");
+        return local.cfc.extends.fullname neq "wheels.migrator.Migration";
       });
       if (ArrayLen(local.files)) {
         local.rv.success = false;
