@@ -74,7 +74,7 @@ component output="false" {
     if (local.routesFileContent contains "addRoute" && local.routesFileContent does not contain "drawRoutes") {
       local.rv.success = false;
       ArrayAppend(local.rv.messages, {
-        message="The <code>addRoute</code> function has been removed from Wheels 2.x. Use the new <code>drawRoutes</code> function/s"
+        message="The <code>addRoute</code> function has been removed from Wheels 2.x. Use the new <code>mapper</code> function/s"
       });
     }
 
