@@ -9,7 +9,7 @@ component output="false" {
    * This plugin version number
    */
   public string function pluginVersion() {
-    return "0.6.0";
+    return "0.6.1";
   }
 
   /**
@@ -670,9 +670,9 @@ component output="false" {
       local.minimumMinor = "5";
       local.minimumPatch = "1";
     } else if (arguments.engine == "Adobe ColdFusion") {
-      local.minimumMajor = "11";
+      local.minimumMajor = "10";
       local.minimumMinor = "0";
-      local.minimumPatch = "11";
+      local.minimumPatch = "23";
       // local.10 = {minimumMinor=0, minimumPatch=4};
     }
     if (local.major < local.minimumMajor || (local.major == local.minimumMajor && local.minor < local.minimumMinor) || (local.major == local.minimumMajor && local.minor == local.minimumMinor && local.patch < local.minimumPatch)) {
