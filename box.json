@@ -1,0 +1,22 @@
+{
+    "name":"UpgradeAdvisor",
+    "version":"-patch",
+    "author":"Adam Chapman",
+    "location":"chapmandu/upgradeadvisor#v-patch",
+    "directory":"/plugins/",
+    "createPackageDirectory":true,
+    "packageDirectory":"upgradeadvisor",
+    "slug":"upgradeadvisor",
+    "type":"cfwheels-plugins",
+    "homepage":"https://github.com/chapmandu/UpgradeAdvisor",
+    "shortDescription":"CFWheels 2.x Upgrade Advisor",
+    "keywords":"upgrade cfwheels",
+    "private":false,
+    "scripts":{
+        "postVersion":"package set location='chapmandu/upgradeadvisor#v`package version`'",
+        "postPublish":"!git push --follow-tags",
+        "patch-release":"bump --patch && publish",
+        "minor-release":"bump --minor && publish",
+        "major-release":"bump --major && publish"
+    }
+}
