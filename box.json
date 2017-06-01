@@ -1,8 +1,8 @@
 {
     "name":"UpgradeAdvisor",
-    "version":"0.1.0-patch",
+    "version":"0.2.0-patch",
     "author":"Adam Chapman",
-    "location":"chapmandu/upgradeadvisor#v0.1.0-patch",
+    "location":"chapmandu/upgradeadvisor#v0.2.0-patch",
     "directory":"/plugins/",
     "createPackageDirectory":true,
     "packageDirectory":"upgradeadvisor",
