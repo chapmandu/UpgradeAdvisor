@@ -357,7 +357,7 @@ component output="false" {
           local.message &= "<li>#_pathFormat(local.i)#</li>";
         }
         local.message &= "</ul>";
-        local.message &= 'You can re-enable these arguments using the <a href="https://github.com/chapmandu/confirmerdisabler" target="_blank">ConfirmerDisabler</a> plugin.';
+        local.message &= 'You can re-enable these arguments using the <a href="https://forgebox.io/view/cfwheels-js-confirm" target="_blank">js-confirm</a> and <a href="https://forgebox.io/view/cfwheels-js-disable" target="_blank">js-disable</a> plugins.';
         ArrayAppend(local.rv.messages, {
           message=local.message
         });
