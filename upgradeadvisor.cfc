@@ -9,7 +9,7 @@ component output="false" {
    * This plugin version number
    */
   public string function pluginVersion() {
-    return "0.6.1";
+    return "0.7.0";
   }
 
   /**
@@ -18,6 +18,7 @@ component output="false" {
   public array function main() {
     return [
       adviseOfInitRename(),
+      adviseOfRootLocalScope(),
       adviseOfServerVersion(),
       adviseOfRoutes(),
       adviseOfCSRF(),
@@ -82,6 +83,18 @@ component output="false" {
       local.rv.success = false;
       ArrayAppend(local.rv.messages, {
         message="The mapper <code>module</code> argument has been renamed, use <code>package</code> instead."
+      });
+    }
+
+    if (local.routesFileContent contains "match(") {
+      local.rv.success = false;
+      ArrayAppend(local.rv.messages, {
+        message="The mapper <code>match</code> argument has been removed. Instead, use a standard http verb
+        <code>get</code>,
+        <code>post</code>,
+        <code>put</code>,
+        <code>delete</code>,
+        or as a last resort, <code>wildcard</code>."
       });
     }
 
@@ -531,6 +544,29 @@ component output="false" {
 
     return local.rv;
   }
+
+  /**
+   * Checks for loc scope use in /root.cfm
+   */
+  public struct function adviseOfRootLocalScope() {
+    local.rv = {
+      name="Redunant Loc Scope",
+      success=true,
+      href="",
+      messages=[]
+    };
+
+    local.content = FileRead(ExpandPath("/root.cfm"));
+    if (local.content contains "loc.") {
+      local.rv.success = false;
+      ArrayAppend(local.rv.messages, {
+        message="Replace <code>loc</code> scope with <code>local</code> in <code>/root.cfm</code>"
+      });
+    }
+
+    return local.rv;
+  }
+
 
   /**
    * Checks for wheels/public/assets in url rewriting rules
