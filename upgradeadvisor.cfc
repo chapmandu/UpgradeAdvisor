@@ -488,7 +488,7 @@ component output="false" {
     if (local.controllerContent does not contain "protectFromForgery(") {
       local.rv.success = false;
       ArrayAppend(local.rv.messages, {
-        message="It's recommended that you use the <code>protectFromForgery()</code> in the <code>init()</code> function of <code>#_pathFormat(local.controllerFilePath)#</code>"
+        message="It's recommended that you use the <code>protectFromForgery()</code> in the <code>config()</code> function of <code>#_pathFormat(local.controllerFilePath)#</code>"
       });
     }
 
