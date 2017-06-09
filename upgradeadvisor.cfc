@@ -9,7 +9,7 @@ component output="false" {
    * This plugin version number
    */
   public string function pluginVersion() {
-    return "0.8.0";
+    return "0.8.1";
   }
 
   /**
@@ -355,7 +355,7 @@ component output="false" {
 
     local.viewDirectoryPath = ExpandPath("/views");
     local.confirmJSPluginExists = DirectoryExists(ExpandPath("/plugins/jsconfirm"));
-    local.disableJSPluginExists = DirectoryExists(ExpandPath("/plugins/jsdisables"));
+    local.disableJSPluginExists = DirectoryExists(ExpandPath("/plugins/jsdisable"));
 
     if (DirectoryExists(local.viewDirectoryPath)) {
       local.allFiles = DirectoryList(local.viewDirectoryPath, true, "path", "*.cfm|*.cfc");
