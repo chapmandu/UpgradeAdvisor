@@ -9,7 +9,7 @@ component output="false" {
    * This plugin version number
    */
   public string function pluginVersion() {
-    return "0.7.0";
+    return "0.8.0";
   }
 
   /**
@@ -354,13 +354,21 @@ component output="false" {
     };
 
     local.viewDirectoryPath = ExpandPath("/views");
+    local.confirmJSPluginExists = DirectoryExists(ExpandPath("/plugins/jsconfirm"));
+    local.disableJSPluginExists = DirectoryExists(ExpandPath("/plugins/jsdisables"));
 
     if (DirectoryExists(local.viewDirectoryPath)) {
       local.allFiles = DirectoryList(local.viewDirectoryPath, true, "path", "*.cfm|*.cfc");
 
       local.files = ArrayFilter(local.allFiles, function(i) {
         local.content = FileRead(i);
-        return (local.content contains "confirm=" or local.content contains "disable=");
+        if (! confirmJSPluginExists && local.content contains "confirm=") {
+          return true;
+        } else if (! disableJSPluginExists && local.content contains "disable=") {
+          return true;
+        } else {
+          return false;
+        }
       });
       if (ArrayLen(local.files)) {
         local.rv.success = false;
