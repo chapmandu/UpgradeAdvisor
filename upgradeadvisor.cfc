@@ -2,6 +2,7 @@ component output="false" {
 
   public any function init() {
     this.version = "2.x";
+    this.installdir = '/crm';
     return this;
   }
 
@@ -9,7 +10,7 @@ component output="false" {
    * This plugin version number
    */
   public string function pluginVersion() {
-    return "0.8.1";
+    return "0.8.2";
   }
 
   /**
@@ -45,8 +46,8 @@ component output="false" {
       href="",
       messages=[]
     };
-    local.oldGlobalHelpersPath = ExpandPath("/events/functions.cfm");
-    local.newGlobalHelpersPath = ExpandPath("/global/functions.cfm");
+    local.oldGlobalHelpersPath = ExpandPath(this.installdir & "/events/functions.cfm");
+    local.newGlobalHelpersPath = ExpandPath(this.installdir & "/global/functions.cfm");
 
     if (FileExists(local.oldGlobalHelpersPath)) {
       local.rv.success = false;
@@ -69,8 +70,8 @@ component output="false" {
       href="",
       messages=[]
     };
-    local.routesFileContent = FileRead(ExpandPath("/config/routes.cfm"));
-    local.pluginDirectoryPath = ExpandPath("/plugins/coldroute");
+    local.routesFileContent = FileRead(ExpandPath(this.installdir & "/config/routes.cfm"));
+    local.pluginDirectoryPath = ExpandPath(this.installdir & "/plugins/coldroute");
 
     if (local.routesFileContent contains "addRoute" && local.routesFileContent does not contain "mapper") {
       local.rv.success = false;
@@ -122,9 +123,9 @@ component output="false" {
       href="",
       messages=[]
     };
-    local.pluginDirectoryPath = ExpandPath("/plugins/dbmigrate");
-    local.migrationsPath = ExpandPath("/db/migrate");
-    local.newMigrationsPath = ExpandPath("/migrator/migrations");
+    local.pluginDirectoryPath = ExpandPath(this.installdir & "/plugins/dbmigrate");
+    local.migrationsPath = ExpandPath(this.installdir & "/db/migrate");
+    local.newMigrationsPath = ExpandPath(this.installdir & "/migrator/migrations");
     local.oldTableName = "schemainfo";
     local.newTableName = "migratorversions";
     local.mapping = "wheels.migrator.Migration";
@@ -151,8 +152,9 @@ component output="false" {
     local.newTableExists = true;
     try {
       QueryExecute(
-        sql="SELECT * FROM migratorversions",
-        options={
+        "SELECT * FROM migratorversions",
+        {},
+        {
           datasource=application.wheels.dataSourceName
         }
       );
@@ -161,7 +163,7 @@ component output="false" {
     }
     if (!local.newTableExists) {
 
-      local.configDirectoryPath = ExpandPath("/config");
+      local.configDirectoryPath = ExpandPath(this.installdir & "/config");
       local.files = DirectoryList(local.configDirectoryPath, true, "path", "*.cfm");
       // you've specified the table name.. carry on!
       local.foundSetting = false;
@@ -216,12 +218,12 @@ component output="false" {
       href="",
       messages=[]
     };
-    local.wheelsControllerFilePath = ExpandPath("/controllers/Wheels.cfc");
-    local.controllerFilePath = ExpandPath("/controllers/Controller.cfc");
+    local.wheelsControllerFilePath = ExpandPath(this.installdir & "/controllers/Wheels.cfc");
+    local.controllerFilePath = ExpandPath(this.installdir & "/controllers/Controller.cfc");
     local.controllerCFC = GetComponentMetaData("controllers.Controller");
     local.controllerMapping = "wheels.Controller";
-    local.wheelsModelFilePath = ExpandPath("/models/Wheels.cfc");
-    local.modelFilePath = ExpandPath("/models/Model.cfc");
+    local.wheelsModelFilePath = ExpandPath(this.installdir & "/models/Wheels.cfc");
+    local.modelFilePath = ExpandPath(this.installdir & "/models/Model.cfc");
     local.modelCFC = GetComponentMetaData("models.Model");
     local.modelMapping = "wheels.Model";
 
@@ -304,8 +306,8 @@ component output="false" {
       href="",
       messages=[]
     };
-    local.testDirectoryPath = ExpandPath("/tests");
-    local.redundantTestFilePath = ExpandPath("/tests/Test.cfc");
+    local.testDirectoryPath = ExpandPath(this.installdir & "/tests");
+    local.redundantTestFilePath = ExpandPath(this.installdir & "/tests/Test.cfc");
     local.mapping = "wheels.Test";
 
     if (FileExists(local.redundantTestFilePath)) {
@@ -353,9 +355,9 @@ component output="false" {
       messages=[]
     };
 
-    local.viewDirectoryPath = ExpandPath("/views");
-    local.confirmJSPluginExists = DirectoryExists(ExpandPath("/plugins/jsconfirm"));
-    local.disableJSPluginExists = DirectoryExists(ExpandPath("/plugins/jsdisable"));
+    local.viewDirectoryPath = ExpandPath(this.installdir & "/views");
+    local.confirmJSPluginExists = DirectoryExists(ExpandPath(this.installdir & "/plugins/jsconfirm"));
+    local.disableJSPluginExists = DirectoryExists(ExpandPath(this.installdir & "/plugins/jsdisable"));
 
     if (DirectoryExists(local.viewDirectoryPath)) {
       local.allFiles = DirectoryList(local.viewDirectoryPath, true, "path", "*.cfm|*.cfc");
@@ -406,7 +408,7 @@ component output="false" {
       {from="cacheModelInitialization", to="cacheModelConfig"}
     ];
 
-    local.configDirectoryPath = ExpandPath("/config");
+    local.configDirectoryPath = ExpandPath(this.installdir & "/config");
     local.files = DirectoryList(local.configDirectoryPath, true, "path", "*.cfm");
 
     local.foundTimeStampMode = false;
@@ -416,7 +418,7 @@ component output="false" {
       for (local.config in local.renamedConfigs) {
         if (local.content contains "set(#local.config.from#=") {
           local.rv.success = false;
-          ArrayAppend(local.messages, "The global setting <code>#local.config.from#</code> found in <code>#_pathFormat(local.file)#</code> has been renamed to <code>#local.config.to#</code>.")
+          ArrayAppend(local.messages, "The global setting <code>#local.config.from#</code> found in <code>#_pathFormat(local.file)#</code> has been renamed to <code>#local.config.to#</code>.");
         }
       }
       if (local.content contains "set(timeStampMode=") {
@@ -450,8 +452,8 @@ component output="false" {
       messages=[]
     };
 
-    local.controllerDirectoryPath = ExpandPath("/controllers");
-    local.modelDirectoryPath = ExpandPath("/models");
+    local.controllerDirectoryPath = ExpandPath(this.installdir & "/controllers");
+    local.modelDirectoryPath = ExpandPath(this.installdir & "/models");
 
     local.allFiles = [];
     ArrayAppend(local.allFiles, DirectoryList(local.controllerDirectoryPath, true, "path", "*.cfc"), true);
@@ -489,8 +491,8 @@ component output="false" {
       messages=[]
     };
 
-    local.controllerFilePath = ExpandPath("/controllers/Controller.cfc");
-    local.viewDirectoryPath = ExpandPath("/views");
+    local.controllerFilePath = ExpandPath(this.installdir & "/controllers/Controller.cfc");
+    local.viewDirectoryPath = ExpandPath(this.installdir & "/views");
 
     local.controllerContent = FileRead(local.controllerFilePath);
     if (local.controllerContent does not contain "protectFromForgery(") {
@@ -534,7 +536,7 @@ component output="false" {
       messages=[]
     };
 
-    local.appFileContent = FileRead(ExpandPath("/config/app.cfm"));
+    local.appFileContent = FileRead(ExpandPath(this.installdir & "/config/app.cfm"));
     local.mappings = [
       'mappings["/app"]',
       "mappings['/app']"
@@ -564,11 +566,11 @@ component output="false" {
       messages=[]
     };
 
-    local.content = FileRead(ExpandPath("/root.cfm"));
+    local.content = FileRead(ExpandPath(this.installdir & "/root.cfm"));
     if (local.content contains "loc.") {
       local.rv.success = false;
       ArrayAppend(local.rv.messages, {
-        message="Replace <code>loc</code> scope with <code>local</code> in <code>/root.cfm</code>"
+        message="Replace <code>loc</code> scope with <code>local</code> in <code>/crm/root.cfm</code>"
       });
     }
 
@@ -588,9 +590,9 @@ component output="false" {
     };
 
     local.paths = [
-      ExpandPath("/.htaccess"),
-      ExpandPath("/web.config"),
-      ExpandPath("/urlrewrite.xml")
+      ExpandPath(this.installdir & "/.htaccess"),
+      ExpandPath(this.installdir & "/web.config"),
+      ExpandPath(this.installdir & "/urlrewrite.xml")
     ];
     local.string = "wheels/public/assets";
 
@@ -618,8 +620,8 @@ component output="false" {
       messages=[]
     };
 
-    local.controllerDirectoryPath = ExpandPath("/controllers");
-    local.modelDirectoryPath = ExpandPath("/models");
+    local.controllerDirectoryPath = ExpandPath(this.installdir & "/controllers");
+    local.modelDirectoryPath = ExpandPath(this.installdir & "/models");
 
     local.allFiles = [];
     ArrayAppend(local.allFiles, DirectoryList(local.controllerDirectoryPath, true, "path", "*.cfc"), true);
@@ -658,8 +660,8 @@ component output="false" {
       messages=[]
     };
 
-    local.controllerDirectoryPath = ExpandPath("/controllers");
-    local.viewDirectoryPath = ExpandPath("/views");
+    local.controllerDirectoryPath = ExpandPath(this.installdir & "/controllers");
+    local.viewDirectoryPath = ExpandPath(this.installdir & "/views");
 
     local.allFiles = [];
     ArrayAppend(local.allFiles, DirectoryList(local.controllerDirectoryPath, true, "path", "*.cfc"), true);
@@ -691,7 +693,7 @@ component output="false" {
    * Removes the file path before the app root
    */
   private string function _pathFormat(required string path) {
-    return ReplaceNoCase(arguments.path, ExpandPath("/"), "/", "one");
+    return ReplaceNoCase(arguments.path, ExpandPath(this.installdir & "/"), "/", "one");
   }
 
   /**
