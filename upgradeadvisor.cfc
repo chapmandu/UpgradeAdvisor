@@ -2,7 +2,8 @@ component output="false" {
 
   public any function init() {
     this.version = "2.x";
-    this.installdir = '/crm';
+    // add path to installation directory if not site root
+    this.installdir = '';
     return this;
   }
 
