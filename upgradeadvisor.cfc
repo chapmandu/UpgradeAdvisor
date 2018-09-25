@@ -2,8 +2,7 @@ component output="false" {
 
   public any function init() {
     this.version = "2.x";
-    // add path to installation directory if not site root
-    this.installdir = '';
+    this.installdir = '/';
     return this;
   }
 
@@ -571,7 +570,7 @@ component output="false" {
     if (local.content contains "loc.") {
       local.rv.success = false;
       ArrayAppend(local.rv.messages, {
-        message="Replace <code>loc</code> scope with <code>local</code> in <code>/crm/root.cfm</code>"
+        message="Replace <code>loc</code> scope with <code>local</code> in <code>/root.cfm</code>"
       });
     }
 
